@@ -6,6 +6,7 @@ using UnityEngine;
 public class WeaponScriptable : ScriptableObject
 {
     public string weaponName;
+    public bool automatic;
     public int magazineSize;
     public int totalAmmo;
     public float fireRate;
