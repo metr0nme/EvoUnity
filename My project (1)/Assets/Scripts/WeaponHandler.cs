@@ -5,70 +5,56 @@ using UnityEngine;
 public class WeaponHandler : MonoBehaviour
 {
 
-    private float nextFireTick;
-    private bool mouseDown = false;
-    //Animator m_animator;
-
-    private Vector3 currentRotation;
-    private Vector3 targetRotation;
-
-    private Camera cam;
-
-    [SerializeField] private float fireRate = 0.11f;
-    [SerializeField] private float recoilX = 1.0f;
-    [SerializeField] private float recoilY = 1.0f;
-    [SerializeField] private float recoilZ = 1.0f;
-
-    [SerializeField] private float snappiness;
-    [SerializeField] private float returnSpeed;
-
-    void createFakeBullet()
-    {
-
-    }
-
-    void setCamRotFire()
-    {
-        targetRotation += new Vector3(-recoilX, Random.Range(-recoilY, recoilY), Random.Range(-recoilZ, recoilZ));
-    }
-
-    void Fire()
-    {
-        nextFireTick = Time.time + fireRate;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        //RaycastHit hit;
-        //if(Physics.Raycast(ray, out hit, 100))
-        //m_animator.SetTrigger("Shoot");
-        setCamRotFire();
-    }
+    public int selectedWeapon = 0;
+    public Transform equippedWeapon;
 
     void Start()
     {
-        nextFireTick = Time.time;
-        //m_animator = GetComponent<Animator>();
-        cam = GameObject.Find("Main Camera").GetComponent<Camera>();
+        SelectWeapon();
     }
 
     void Update()
     {
+        int previousSelectedWeapon = selectedWeapon;
 
-        targetRotation = Vector3.Lerp(targetRotation, Vector3.zero, returnSpeed * Time.deltaTime);
-        currentRotation = Vector3.Slerp(currentRotation, targetRotation, snappiness * Time.fixedDeltaTime);
-        cam.transform.localRotation = Quaternion.Euler(currentRotation);
+        if (Input.GetAxis("Mouse ScrollWheel") > 0f)
+            if (selectedWeapon >= transform.childCount - 1)
+                selectedWeapon = 0;
+            else
+                selectedWeapon++; 
 
-        if(Input.GetMouseButtonDown(0))
-            mouseDown = true;
+        if (Input.GetAxis("Mouse ScrollWheel") < 0f)
+            if (selectedWeapon <= 0)
+                selectedWeapon = transform.childCount - 1;
+            else
+                selectedWeapon--;
 
-        if(Input.GetMouseButtonUp(0))
-            mouseDown = false;
+        if(Input.GetKeyDown(KeyCode.Alpha1))
+            selectedWeapon = 0;
 
-        if(mouseDown && Time.time >= nextFireTick)
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+            selectedWeapon = 1;
+
+        if (previousSelectedWeapon != selectedWeapon)
+            SelectWeapon();
+
+    }
+
+    void SelectWeapon()
+    {
+        int i = 0;
+        foreach (Transform weapon in transform)
         {
-            Fire();
-            Debug.Log("Firing");
-        };
-
-
+            if (i == selectedWeapon)
+            {
+                weapon.gameObject.SetActive(true);
+                equippedWeapon = weapon;
+            } else {
+                weapon.gameObject.SetActive(false);
+            }
+            
+            i++;
+        }
     }
 
 }
