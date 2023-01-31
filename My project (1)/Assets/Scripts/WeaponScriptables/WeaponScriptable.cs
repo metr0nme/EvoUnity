@@ -10,6 +10,7 @@ public class WeaponScriptable : ScriptableObject
     public int magazineSize;
     public int totalAmmo;
     public float fireRate;
+    public float reloadRate;
     public float recoilResetRate;
     public float recoilSnap;
     public float recoilReturnRate;
