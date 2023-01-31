@@ -15,18 +15,23 @@ public class WeaponBaseClass : MonoBehaviour
     private float recoilReturnRate;
     private Vector3 recoilValue;
     private float fireRate;
+    private float recoilResetRate;
     private int magSize;
     private int totalAmmo;
     private bool automatic;
+    private Vector2[] sprayPattern;
 
     // Changing (Mut) Var
     public int currentMagSize;
     public int currentTotalAmmo;
     private float nextFireTick;
+    private float nextRecoilResetTick;
     private bool mouseDown;
     private bool autoCanFire;
     private Vector3 currentRotation;
     private Vector3 targetRotation;
+    private int currentBullet;
+    private Vector2 currRecoilVal;
 
     void Start()
     {
@@ -39,16 +44,30 @@ public class WeaponBaseClass : MonoBehaviour
         magSize = weaponValues.magazineSize;
         totalAmmo = weaponValues.totalAmmo;
         automatic = weaponValues.automatic;
+        sprayPattern = weaponValues.sprayPattern;
+        recoilResetRate = weaponValues.recoilResetRate;
         mouseDown = false;
         autoCanFire = false;
         nextFireTick = Time.time;
+        nextRecoilResetTick = Time.time;
         currentMagSize = magSize;
         currentTotalAmmo = totalAmmo;
     }
 
+    void setCurrentBullet()
+    {
+        if(Time.time >= nextRecoilResetTick)
+            currentBullet = 0;
+        else
+            currentBullet++;
+        
+        nextRecoilResetTick = Time.time + recoilResetRate;
+    }
+
     void setCamRotFire()
     {
-        targetRotation += new Vector3(-recoilValue.x, Random.Range(-recoilValue.y, recoilValue.y), Random.Range(-recoilValue.z, recoilValue.z));
+        currRecoilVal = sprayPattern[currentBullet - 1];
+        targetRotation += new Vector3(-currRecoilVal.x, Random.Range(-currRecoilVal.y, currRecoilVal.y), Random.Range(-1, 1));
     }
 
     void Fire()
@@ -62,7 +81,8 @@ public class WeaponBaseClass : MonoBehaviour
                 return;
             else
                 autoCanFire = false;
-            
+        
+        setCurrentBullet();
         currentMagSize--;
         nextFireTick = Time.time + fireRate;
 
@@ -77,6 +97,7 @@ public class WeaponBaseClass : MonoBehaviour
 
     void Update()
     {
+        
 
         targetRotation = Vector3.Lerp(targetRotation, Vector3.zero, recoilReturnRate * Time.deltaTime);
         currentRotation = Vector3.Slerp(currentRotation, targetRotation, recoilSnap * Time.fixedDeltaTime);
