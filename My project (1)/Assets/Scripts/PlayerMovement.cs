@@ -145,6 +145,13 @@ public class PlayerMovement : MonoBehaviour
         //Apply forces to move player
         rb.AddForce(orientation.transform.forward * y * moveSpeed * Time.deltaTime * multiplier * multiplierV);
         rb.AddForce(orientation.transform.right * x * moveSpeed * Time.deltaTime * multiplier);
+
+        // beters: trying to make the char model face the right dir
+        //transform.rotation = playerCam.transform.rotation; // this produced some funny results
+        //transform.rotation = Quaternion.Euler(playerCam.transform.eulerAngles.x,0,playerCam.transform.eulerAngles.z); //similar but less extreme
+        //transform.rotation = Quaternion.Euler(transform.rotation.x, playerCam.transform.rotation.y, transform.rotation.z); this didnt work
+        //transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward, Camera.main.transform.up);
+        //transform.LookAt(new Vector3(0, 0, playerCam.transform.forward.z));
     }
 
     private void Jump()
@@ -190,6 +197,7 @@ public class PlayerMovement : MonoBehaviour
         //Perform the rotations
         playerCam.transform.localRotation = Quaternion.Euler(xRotation, desiredX, 0);
         orientation.transform.localRotation = Quaternion.Euler(0, desiredX, 0);
+        transform.localRotation = orientation.localRotation;
     }
 
     private void CounterMovement(float x, float y, Vector2 mag)
