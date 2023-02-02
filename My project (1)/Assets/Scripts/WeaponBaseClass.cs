@@ -32,6 +32,7 @@ public class WeaponBaseClass : MonoBehaviour
     private float nextFireTick;
     private float nextRecoilResetTick;
     private bool mouseDown;
+    private bool firing;
     private bool autoCanFire;
     private bool reloading;
     private Vector3 currentRotation;
@@ -77,6 +78,7 @@ public class WeaponBaseClass : MonoBehaviour
         targetRotation += new Vector3(-currRecoilVal.x, Random.Range(-currRecoilVal.y, currRecoilVal.y), 0);
     }
 
+
     void Fire()
     {
         if (currentMagSize <= 0 || reloading)
@@ -102,6 +104,7 @@ public class WeaponBaseClass : MonoBehaviour
             targetPos = ray.GetPoint(75);
 
         animator.SetTrigger("Shoot"); // play fire animation
+        firing = true;
         CreateFakeBullet(targetPos);
         setCamRotFire();
     }

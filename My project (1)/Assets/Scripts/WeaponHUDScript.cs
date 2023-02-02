@@ -23,7 +23,7 @@ public class WeaponHUDScript : MonoBehaviour
 
     void Start()
     {
-        gunController = player.transform.Find("Camera/GunController");
+        gunController = player.transform.Find("Head/Camera/GunController");
         weaponHandler = gunController.GetComponent<WeaponHandler>();
     }
 

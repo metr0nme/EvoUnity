@@ -9,7 +9,6 @@ public class PlayerMovement : MonoBehaviour
     //Assingables
     public Transform playerCam;
     public Transform orientation;
-    public Transform playerTransform;
 
     //Other
     private Rigidbody rb;
@@ -50,7 +49,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Awake()
     {
-        rb = playerTransform.GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
     }
 
     void Start()
@@ -101,6 +100,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void Movement()
     {
+
+
         //Extra gravity
         rb.AddForce(Vector3.down * Time.deltaTime * 10);
 
@@ -192,7 +193,6 @@ public class PlayerMovement : MonoBehaviour
         //Perform the rotations
         playerCam.transform.localRotation = Quaternion.Euler(xRotation, desiredX, 0);
         orientation.transform.localRotation = Quaternion.Euler(0, desiredX, 0);
-        transform.Rotate(Vector3.up * mouseX);
     }
 
     private void CounterMovement(float x, float y, Vector2 mag)
