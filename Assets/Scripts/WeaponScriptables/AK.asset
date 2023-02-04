@@ -23,8 +23,8 @@ MonoBehaviour:
   recoilReturnRate: 1.6
   recoilValue: {x: 1, y: 1, z: 1}
   sprayPattern:
-  - {x: 0.1, y: 0.1}
-  - {x: 0.2, y: 0.2}
+  - {x: 1, y: 1}
+  - {x: 0.33, y: 0.33}
   - {x: 0.4, y: 0.4}
   - {x: 0.6, y: 0.6}
   - {x: 1, y: 1}

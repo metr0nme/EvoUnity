@@ -11,14 +11,14 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - Map
   - 
   - PostProcessing
   - GunCamera
   - 
   - Ground
   - LocalPlayer
-  - 
+  - LocalGun
   - 
   - 
   - 

@@ -5,11 +5,14 @@ using UnityEngine;
 public class WeaponBaseClass : MonoBehaviour
 {
 
+    private float swaySmooth = 4;
+    private float swayMultiplier = 1;
+
     // Script Var
     private Animator animator;
     private Camera cam;
     public GameObject player;
-    
+
     [SerializeField] public GameObject FirePoint;
     [SerializeField] public GameObject BulletTemplate;
     
@@ -29,16 +32,17 @@ public class WeaponBaseClass : MonoBehaviour
     // Changing (Mut) Var
     public int currentMagSize;
     public int currentTotalAmmo;
+    private int currentBullet;
     private float nextFireTick;
     private float nextRecoilResetTick;
     private bool mouseDown;
-    private bool firing;
     private bool autoCanFire;
     private bool reloading;
     private Vector3 currentRotation;
     private Vector3 targetRotation;
-    private int currentBullet;
     private Vector2 currRecoilVal;
+    private SpringVector3 fireSpring;
+    private SpringVector3 swaySpring;
 
     void Start()
     {
@@ -60,6 +64,23 @@ public class WeaponBaseClass : MonoBehaviour
         nextRecoilResetTick = Time.time;
         currentMagSize = magSize;
         currentTotalAmmo = totalAmmo;
+
+        fireSpring = new SpringVector3()
+        {
+            StartValue = transform.localPosition,
+            EndValue = transform.localPosition,
+            Damping = 6,
+            Stiffness = 100
+        };
+
+        swaySpring = new SpringVector3()
+        {
+            StartValue = Vector3.zero,
+            EndValue = Vector3.zero,
+            Damping = 6,
+            Stiffness = 6
+        };
+
     }
 
     void setCurrentBullet()
@@ -74,10 +95,18 @@ public class WeaponBaseClass : MonoBehaviour
 
     void setCamRotFire()
     {
-        currRecoilVal = sprayPattern[currentBullet - 1];
+        currRecoilVal = sprayPattern[currentBullet];
         targetRotation += new Vector3(-currRecoilVal.x, Random.Range(-currRecoilVal.y, currRecoilVal.y), 0);
     }
 
+    private float absValueRandom(float value)
+    {
+        float newValue;
+        float[] floats = {1f, -1f};
+        var randomIndex = Random.Range(0, floats.Length);
+        newValue = value * floats[randomIndex];
+        return newValue;
+    }
 
     void Fire()
     {
@@ -104,7 +133,9 @@ public class WeaponBaseClass : MonoBehaviour
             targetPos = ray.GetPoint(75);
 
         animator.SetTrigger("Shoot"); // play fire animation
-        firing = true;
+        fireSpring.Reset();
+        fireSpring.InitialVelocity = new Vector3(absValueRandom(Random.Range(0.05f, 0.15f)), Random.Range(0.2f, 0.3f), -Random.Range(0.45f, 0.55f));
+
         CreateFakeBullet(targetPos);
         setCamRotFire();
     }
@@ -143,7 +174,29 @@ public class WeaponBaseClass : MonoBehaviour
         Vector3 dir = hitPos - FirePoint.transform.position;
         GameObject newBullet = Instantiate(BulletTemplate, FirePoint.transform.position, Quaternion.identity);
         newBullet.GetComponent<Rigidbody>().AddForce(dir.normalized * 100, ForceMode.Impulse);
-        //Destroy(newBullet, 0.5f);
+        Destroy(newBullet, 0.5f);
+    }
+
+    void HandleMouseSway()
+    {
+        // get mouse input
+        float mouseX = Input.GetAxisRaw("Mouse X") * swayMultiplier -90f;
+        float mouseY = Input.GetAxisRaw("Mouse Y") * swayMultiplier;
+        // calculate target rotation
+        Quaternion rotationX = Quaternion.AngleAxis( mouseY, Vector3.left);
+        Quaternion rotationY = Quaternion.AngleAxis(mouseX, Vector3.up);
+        Quaternion targetRotation = rotationX * rotationY;
+        // rotate 
+        transform.localRotation = Quaternion.Slerp(transform.localRotation, targetRotation, swaySmooth * Time.deltaTime);
+    }
+
+    void OldHandleMouseSway()
+    {
+        // handle sway spring
+        //float mouseX = Input.GetAxisRaw("Mouse X") * 5; //TODO: replace mousex, mousey with MouseDelta
+        //float mouseY = Input.GetAxisRaw("Mouse Y") * 5;
+        //swaySpring.InitialVelocity = new Vector3(-mouseX / 5, mouseY / 2, 0);
+        //transform.localPosition += swaySpring.Evaluate(Time.fixedDeltaTime); // update sway spring pos to be added to other springs
     }
 
     void Update()
@@ -152,6 +205,9 @@ public class WeaponBaseClass : MonoBehaviour
         targetRotation = Vector3.Lerp(targetRotation, Vector3.zero, recoilReturnRate * Time.deltaTime);
         currentRotation = Vector3.Slerp(currentRotation, targetRotation, recoilSnap * Time.fixedDeltaTime);
         cam.transform.localRotation = Quaternion.Euler(currentRotation);
+
+        transform.localPosition = fireSpring.Evaluate(Time.fixedDeltaTime); // update spring pos
+        HandleMouseSway();
 
         if(Input.GetMouseButton(0)) // so theres "GetMouseButton" and "GetMouseButtonDown". GetMouseButtonDown registers only the first time the user clicks, GetMouseButton will register every frame the user is clicking.
             mouseDown = true;
@@ -162,7 +218,6 @@ public class WeaponBaseClass : MonoBehaviour
 
         if(mouseDown && Time.time >= nextFireTick)
             Fire();
-            Debug.Log("Firing");
 
         if(Input.GetKey(KeyCode.R))
             Reload();
