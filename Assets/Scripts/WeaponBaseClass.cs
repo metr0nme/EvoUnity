@@ -5,9 +5,6 @@ using UnityEngine;
 public class WeaponBaseClass : MonoBehaviour
 {
 
-    private float swaySmooth = 4;
-    private float swayMultiplier = 1;
-
     // Script Var
     private Animator animator;
     public GameObject player;
@@ -40,7 +37,6 @@ public class WeaponBaseClass : MonoBehaviour
     private bool autoCanFire;
     private bool reloading;
     private Vector2 currRecoilVal;
-    private SpringVector3 fireSpring;
     private SpringVector3 swaySpring;
 
     void Start()
@@ -65,14 +61,6 @@ public class WeaponBaseClass : MonoBehaviour
         nextRecoilResetTick = Time.time;
         currentMagSize = magSize;
         currentTotalAmmo = totalAmmo;
-
-        fireSpring = new SpringVector3()
-        {
-            StartValue = weaponValues.viewmodelOffset,
-            EndValue = weaponValues.viewmodelOffset,
-            Damping = 6,
-            Stiffness = 100,
-        };
 
         swaySpring = new SpringVector3()
         {
@@ -135,9 +123,8 @@ public class WeaponBaseClass : MonoBehaviour
             targetPos = ray.GetPoint(75);
 
         animator.SetTrigger("Shoot"); // play fire animation
-        fireSpring.Reset();
-        fireSpring.InitialVelocity = new Vector3(absValueRandom(Random.Range(0.05f, 0.15f)), Random.Range(0.2f, 0.3f), -Random.Range(0.45f, 0.55f));
-
+        
+        ClientEventManager.current.VMFireShake(new Vector3(absValueRandom(Random.Range(0.05f, 0.15f)), Random.Range(0.2f, 0.3f), -Random.Range(0.45f, 0.55f)));
         CreateFakeBullet(targetPos);
         setCamRotFire();
     }
@@ -179,19 +166,6 @@ public class WeaponBaseClass : MonoBehaviour
         Destroy(newBullet, 0.5f);
     }
 
-    void HandleMouseSway()
-    {
-        // get mouse input
-        float mouseX = Input.GetAxisRaw("Mouse X") * swayMultiplier -90f;
-        float mouseY = Input.GetAxisRaw("Mouse Y") * swayMultiplier;
-        // calculate target rotation
-        Quaternion rotationX = Quaternion.AngleAxis( mouseY, Vector3.left);
-        Quaternion rotationY = Quaternion.AngleAxis(mouseX, Vector3.up);
-        Quaternion targetRotation = rotationX * rotationY;
-        // rotate 
-        transform.localRotation = Quaternion.Slerp(transform.localRotation, targetRotation, swaySmooth * Time.deltaTime);
-    }
-
     void OldHandleMouseSway()
     {
         // handle sway spring
@@ -203,9 +177,6 @@ public class WeaponBaseClass : MonoBehaviour
 
     void Update()
     {
-
-        transform.localPosition = fireSpring.Evaluate(Time.fixedDeltaTime); // update spring pos
-        HandleMouseSway();
 
         if(Input.GetMouseButton(0)) // so theres "GetMouseButton" and "GetMouseButtonDown". GetMouseButtonDown registers only the first time the user clicks, GetMouseButton will register every frame the user is clicking.
             mouseDown = true;

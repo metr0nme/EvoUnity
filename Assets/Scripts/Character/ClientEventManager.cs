@@ -18,4 +18,12 @@ public class ClientEventManager : MonoBehaviour
             onFireShake(vectorArray);   
     }
 
+    public event Action<Vector3> onVMFireShake;
+    public void VMFireShake(Vector3 push)
+    {
+        if(onVMFireShake != null)
+            onVMFireShake(push);
+    }
+
+
 }
