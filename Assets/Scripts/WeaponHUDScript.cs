@@ -8,7 +8,7 @@ public class WeaponHUDScript : MonoBehaviour
 
     public GameObject player;
     private Transform gunController;
-    private WeaponHandler weaponHandler;
+    //private WeaponHandler weaponHandler;
     private WeaponBaseClass baseClass;
 
     public Text totalAmmoText;
@@ -24,18 +24,18 @@ public class WeaponHUDScript : MonoBehaviour
     void Start()
     {
         gunController = player.transform.Find("Head/Camera/GunController");
-        weaponHandler = gunController.GetComponent<WeaponHandler>();
+        //weaponHandler = gunController.GetComponent<WeaponHandler>();
     }
 
     void Update()
     {
 
-        if (weaponHandler.equippedWeapon == null)
-            return;
+        //if (weaponHandler.equippedWeapon == null)
+            //return;
 
-        if (equippedWeapon != weaponHandler.equippedWeapon)
-            equippedWeapon = weaponHandler.equippedWeapon;
-            updateWeaponVar();
+        //if (equippedWeapon != weaponHandler.equippedWeapon)
+            //equippedWeapon = weaponHandler.equippedWeapon;
+            //updateWeaponVar();
 
         totalAmmoText.text = baseClass.currentTotalAmmo.ToString();
         magazineSizeText.text = baseClass.currentMagSize.ToString();

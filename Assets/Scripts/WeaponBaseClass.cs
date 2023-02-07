@@ -10,8 +10,9 @@ public class WeaponBaseClass : MonoBehaviour
 
     // Script Var
     private Animator animator;
-    private Camera cam;
     public GameObject player;
+    public GameObject playerCam;
+    private Camera cam;
 
     [SerializeField] public GameObject FirePoint;
     [SerializeField] public GameObject BulletTemplate;
@@ -46,8 +47,10 @@ public class WeaponBaseClass : MonoBehaviour
 
     void Start()
     {
+        playerCam = player.GetComponent<CharacterVariables>().Camera;
+        cam = playerCam.transform.Find("Main Camera").GetComponent<Camera>();
+
         animator = GetComponent<Animator>();
-        cam = GameObject.Find("Main Camera").GetComponent<Camera>(); // apparently GameObject.Find is a very bad practice because it is SLOW. It's faster & easier to attatch the main camera to the script in the hierarchy
         recoilSnap = weaponValues.recoilSnap;
         recoilReturnRate = weaponValues.recoilReturnRate;
         recoilValue = weaponValues.recoilValue;
@@ -67,8 +70,8 @@ public class WeaponBaseClass : MonoBehaviour
 
         fireSpring = new SpringVector3()
         {
-            StartValue = transform.localPosition,
-            EndValue = transform.localPosition,
+            StartValue = weaponValues.viewmodelOffset,
+            EndValue = weaponValues.viewmodelOffset,
             Damping = 6,
             Stiffness = 100
         };
@@ -96,7 +99,7 @@ public class WeaponBaseClass : MonoBehaviour
     void setCamRotFire()
     {
         currRecoilVal = sprayPattern[currentBullet];
-        targetRotation += new Vector3(-currRecoilVal.x, Random.Range(-currRecoilVal.y, currRecoilVal.y), 0);
+        targetRotation += new Vector3(-currRecoilVal.x / 10, Random.Range(-currRecoilVal.y, currRecoilVal.y), 0);
     }
 
     private float absValueRandom(float value)
@@ -124,7 +127,7 @@ public class WeaponBaseClass : MonoBehaviour
         nextFireTick = Time.time + fireRate;
 
         // this will cast a ray and give you the result ( this is where you can apply damage or do whatever :3 )
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         Vector3 targetPos;
         if(Physics.Raycast(ray, out hit, 100))
@@ -204,7 +207,7 @@ public class WeaponBaseClass : MonoBehaviour
 
         targetRotation = Vector3.Lerp(targetRotation, Vector3.zero, recoilReturnRate * Time.deltaTime);
         currentRotation = Vector3.Slerp(currentRotation, targetRotation, recoilSnap * Time.fixedDeltaTime);
-        cam.transform.localRotation = Quaternion.Euler(currentRotation);
+        playerCam.transform.localRotation *= Quaternion.Euler(currentRotation);
 
         transform.localPosition = fireSpring.Evaluate(Time.fixedDeltaTime); // update spring pos
         HandleMouseSway();

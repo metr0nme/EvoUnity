@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class BrycesMovement : MonoBehaviour
+public class BrycesMovement : NetworkBehaviour
 {
 
     // PORTED SOURCE MOVEMENT FROM EVOSTRIKE-RBX BY: Bryce "beters" Peters
@@ -53,6 +54,10 @@ public class BrycesMovement : MonoBehaviour
 
     void Start()
     {
+
+        if(!isLocalPlayer)
+            playerCam.gameObject.SetActive(false);
+
         initInputs();
         rb = GetComponent<Rigidbody>();
     }
@@ -64,7 +69,7 @@ public class BrycesMovement : MonoBehaviour
         float mouseY = Input.GetAxis("Mouse Y") * sensitivity * Time.fixedDeltaTime * sensMultiplier;
 
         //Find current look rotation
-        Vector3 rot = playerCam.transform.localRotation.eulerAngles;
+        Vector3 rot = playerCam.transform.rotation.eulerAngles;
         desiredX = rot.y + mouseX;
 
         //Rotate, and also make sure we dont over- or under-rotate.
@@ -72,8 +77,8 @@ public class BrycesMovement : MonoBehaviour
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
         //Perform the rotations
-        playerCam.transform.localRotation = Quaternion.Euler(xRotation, desiredX, 0);
-        orientation.transform.localRotation = Quaternion.Euler(0, desiredX, 0);
+        playerCam.transform.rotation = Quaternion.Euler(xRotation, desiredX, 0);
+        orientation.transform.rotation = Quaternion.Euler(0, desiredX, 0);
     }
 
     private void RegisterInputs()
@@ -121,8 +126,8 @@ public class BrycesMovement : MonoBehaviour
         int currForwardDir = ForwardDir();
         int currRightDir = RightDir();
 
-        Vector3 accelForward = Camera.main.transform.forward * currForwardDir;
-        Vector3 accelSide = Camera.main.transform.right * currRightDir;
+        Vector3 accelForward = playerCam.transform.forward * currForwardDir;
+        Vector3 accelSide = playerCam.transform.right * currRightDir;
         Vector3 accelDir = (accelForward + accelSide).normalized;
 
         // fix zero errors
@@ -197,14 +202,14 @@ public class BrycesMovement : MonoBehaviour
     void Update()
     {
 
+        if(!isLocalPlayer) { return; }
+
         updateGravity();
 
         Look();
         RegisterInputs();
 
         Invoke("Movement", 0f);
-
-        //rb.velocity = playerVelocity;
 
     }
 }
