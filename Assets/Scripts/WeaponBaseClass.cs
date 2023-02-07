@@ -46,7 +46,7 @@ public class WeaponBaseClass : MonoBehaviour
     void Start()
     {
         playerCam = player.GetComponent<CharacterVariables>().Camera;
-        cam = playerCam.transform.Find("Main Camera").GetComponent<Camera>();
+        cam = playerCam.GetComponent<CameraVar>().MainCamera.GetComponent<Camera>();
 
         animator = GetComponent<Animator>();
         recoilSnap = weaponValues.recoilSnap;
@@ -203,8 +203,6 @@ public class WeaponBaseClass : MonoBehaviour
 
     void Update()
     {
-
-        
 
         transform.localPosition = fireSpring.Evaluate(Time.fixedDeltaTime); // update spring pos
         HandleMouseSway();
