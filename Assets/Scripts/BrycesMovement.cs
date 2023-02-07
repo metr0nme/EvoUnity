@@ -7,8 +7,10 @@ public class BrycesMovement : NetworkBehaviour
 {
 
     // PORTED SOURCE MOVEMENT FROM EVOSTRIKE-RBX BY: Bryce "beters" Peters
-    // THANKS TO: pdnghiaqoi, Dani
+    // THANKS TO: "pdnghiaqoi" on Roblox
 
+    // Movement Settings
+    [Header("Movement Settings")]
     [SerializeField] public float friction = 16f;
     [SerializeField] public float airAccel = 500f;
     [SerializeField] public float airMaxSpeed = 7f;
@@ -17,17 +19,12 @@ public class BrycesMovement : NetworkBehaviour
     [SerializeField] public float jumpVelocity = 50f;
     [SerializeField] public float gravity = 100f;
 
-
-    // Assignables
-    public Transform playerCam;
-    public Transform orientation;
-    public LayerMask groundLayer;
+    [Header("Assignables")]
+    [SerializeField] public Transform playerCam;
+    [SerializeField] public Transform orientation;
+    [SerializeField] public LayerMask groundLayer;
 
     // Script Var
-    private float sensitivity = 50f;
-    private float sensMultiplier = 1f;
-    private float desiredX;
-    private float xRotation;
     private string[] inputButtonsDef = {"W", "A", "S", "D", "Space"};
     private IDictionary<string, int> currInputs;
     private Rigidbody rb;
@@ -62,28 +59,8 @@ public class BrycesMovement : NetworkBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
-    // Look taken from Dani
-    private void Look()
-    {
-        float mouseX = Input.GetAxis("Mouse X") * sensitivity * Time.fixedDeltaTime * sensMultiplier;
-        float mouseY = Input.GetAxis("Mouse Y") * sensitivity * Time.fixedDeltaTime * sensMultiplier;
-
-        //Find current look rotation
-        Vector3 rot = playerCam.transform.rotation.eulerAngles;
-        desiredX = rot.y + mouseX;
-
-        //Rotate, and also make sure we dont over- or under-rotate.
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-
-        //Perform the rotations
-        playerCam.transform.rotation = Quaternion.Euler(xRotation, desiredX, 0);
-        orientation.transform.rotation = Quaternion.Euler(0, desiredX, 0);
-    }
-
     private void RegisterInputs()
     {
-
         foreach(string str in inputButtonsDef)
         {
             KeyCode code = (KeyCode) System.Enum.Parse(typeof(KeyCode), str); // convert string into keycode
@@ -93,32 +70,29 @@ public class BrycesMovement : NetworkBehaviour
                 currInputs[str] = 0;
 
         }
+    }
 
+    // beters: i made this function to shorten the conversion of 1, 0 to 1, -1
+    // its very important you have the arrays in the correct order {+, -} or {forward, backward}
+    private int InverseInputOperation(int[] inputIntegers)
+    {
+        int i = 0;
+        i = inputIntegers[0] == 1 ? 1 : (inputIntegers[1] == 1 ? -1 : 0);
+        return i;
     }
 
     // Custom Movement Input
     private int RightDir()
     {
-        int i = 0;
-        if(currInputs["D"] == 1)
-            i = 1;
-        else if(currInputs["A"] == 1)
-            i = -1;
-
-        return i;
+        int[] rightInputArray = {currInputs["D"], currInputs["A"]};
+        return InverseInputOperation(rightInputArray);
     }
 
     private int ForwardDir()
     {
-        int i = 0;
-        if(currInputs["W"] == 1)
-            i = 1;
-        else if(currInputs["S"] == 1)
-            i = -1;
-
-        return i;
+        int[] forwardInputArray = {currInputs["W"], currInputs["S"]};
+        return InverseInputOperation(forwardInputArray);
     }
-    //
 
     // GetMovementVelocity taken from "pdnghiaqoi" on Roblox DevForums, ported to unity by "beters" (me bitch)
     private Vector3 GetMovementVelocity(Vector3 previousVelocity, float acceleration, float maxSpeed, bool ground)
@@ -206,7 +180,6 @@ public class BrycesMovement : NetworkBehaviour
 
         updateGravity();
 
-        Look();
         RegisterInputs();
 
         Invoke("Movement", 0f);

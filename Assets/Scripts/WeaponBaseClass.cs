@@ -39,8 +39,6 @@ public class WeaponBaseClass : MonoBehaviour
     private bool mouseDown;
     private bool autoCanFire;
     private bool reloading;
-    private Vector3 currentRotation;
-    private Vector3 targetRotation;
     private Vector2 currRecoilVal;
     private SpringVector3 fireSpring;
     private SpringVector3 swaySpring;
@@ -73,7 +71,7 @@ public class WeaponBaseClass : MonoBehaviour
             StartValue = weaponValues.viewmodelOffset,
             EndValue = weaponValues.viewmodelOffset,
             Damping = 6,
-            Stiffness = 100
+            Stiffness = 100,
         };
 
         swaySpring = new SpringVector3()
@@ -99,7 +97,8 @@ public class WeaponBaseClass : MonoBehaviour
     void setCamRotFire()
     {
         currRecoilVal = sprayPattern[currentBullet];
-        targetRotation += new Vector3(-currRecoilVal.x / 10, Random.Range(-currRecoilVal.y, currRecoilVal.y), 0);
+        float[] va = {-currRecoilVal.x, Random.Range(-currRecoilVal.y, currRecoilVal.y)};
+        ClientEventManager.current.FireShake(va);
     }
 
     private float absValueRandom(float value)
@@ -205,9 +204,7 @@ public class WeaponBaseClass : MonoBehaviour
     void Update()
     {
 
-        targetRotation = Vector3.Lerp(targetRotation, Vector3.zero, recoilReturnRate * Time.deltaTime);
-        currentRotation = Vector3.Slerp(currentRotation, targetRotation, recoilSnap * Time.fixedDeltaTime);
-        playerCam.transform.localRotation *= Quaternion.Euler(currentRotation);
+        
 
         transform.localPosition = fireSpring.Evaluate(Time.fixedDeltaTime); // update spring pos
         HandleMouseSway();
