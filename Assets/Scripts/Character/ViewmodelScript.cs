@@ -23,6 +23,7 @@ public class ViewmodelScript : MonoBehaviour
     void Update()
     {
         transform.localPosition = fireSpring.Evaluate(Time.fixedDeltaTime); // update spring pos
+        HandleMouseSway();
     }
 
     void VMFireShake(Vector3 push)
@@ -34,10 +35,10 @@ public class ViewmodelScript : MonoBehaviour
     void HandleMouseSway()
     {
         // get mouse input
-        float mouseX = Input.GetAxisRaw("Mouse X") * swayMultiplier -90f;
+        float mouseX = Input.GetAxisRaw("Mouse X") * swayMultiplier;
         float mouseY = Input.GetAxisRaw("Mouse Y") * swayMultiplier;
         // calculate target rotation
-        Quaternion rotationX = Quaternion.AngleAxis( mouseY, Vector3.left);
+        Quaternion rotationX = Quaternion.AngleAxis(mouseY, Vector3.right);
         Quaternion rotationY = Quaternion.AngleAxis(mouseX, Vector3.up);
         Quaternion targetRotation = rotationX * rotationY;
         // rotate 

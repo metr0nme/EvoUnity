@@ -25,7 +25,6 @@ public class CameraRecoil : MonoBehaviour
 
     private void Update()
     {
-        if(targetRotation == Vector3.zero) { return; }
         targetRotation = Vector3.Lerp(targetRotation, Vector3.zero, recoilReturnRate * Time.fixedDeltaTime);
         currentRotation = Vector3.Slerp(currentRotation, targetRotation, recoilSnap * Time.fixedDeltaTime);
         transform.localRotation = Quaternion.Euler(currentRotation);
