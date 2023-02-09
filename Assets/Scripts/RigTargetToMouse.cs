@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class RigTargetToMouse : MonoBehaviour
-{
+{   
+
+    [SerializeField] public Camera playerCam;
+
     void Update()
     {
         Vector3 mousePos = Input.mousePosition;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray ray = playerCam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         Vector3 targetPos = ray.GetPoint(2);
         transform.position = targetPos;
     }

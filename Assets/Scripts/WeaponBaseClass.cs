@@ -6,11 +6,13 @@ public class WeaponBaseClass : MonoBehaviour
 {
 
     // Script Var
-    private Animator animator;
+    private Camera cam;
+    private Animator armsAnimator;
+    private Animator playerAnimator;
+    private CharacterVariables charvar;
+
     public GameObject player;
     public GameObject playerCam;
-    private Camera cam;
-
     [SerializeField] public GameObject FirePoint;
     [SerializeField] public GameObject BulletTemplate;
     
@@ -26,6 +28,7 @@ public class WeaponBaseClass : MonoBehaviour
     private int totalAmmo;
     private bool automatic;
     private Vector2[] sprayPattern;
+    private Vector3 vmOffset;
 
     // Changing (Mut) Var
     public int currentMagSize;
@@ -41,10 +44,12 @@ public class WeaponBaseClass : MonoBehaviour
 
     void Start()
     {
-        playerCam = player.GetComponent<CharacterVariables>().Camera;
+        charvar = player.GetComponent<CharacterVariables>();
+        playerCam = charvar.Camera;
         cam = playerCam.GetComponent<CameraVar>().MainCamera.GetComponent<Camera>();
+        armsAnimator = charvar.Arms.GetComponent<Animator>();
+        playerAnimator = charvar.playerAnimator;
 
-        animator = GetComponent<Animator>();
         recoilSnap = weaponValues.recoilSnap;
         recoilReturnRate = weaponValues.recoilReturnRate;
         recoilValue = weaponValues.recoilValue;
@@ -55,6 +60,7 @@ public class WeaponBaseClass : MonoBehaviour
         sprayPattern = weaponValues.sprayPattern;
         recoilResetRate = weaponValues.recoilResetRate;
         reloadRate = weaponValues.reloadRate;
+        vmOffset = weaponValues.viewmodelOffset;
         mouseDown = false;
         autoCanFire = false;
         nextFireTick = Time.time;
@@ -122,7 +128,9 @@ public class WeaponBaseClass : MonoBehaviour
         else   
             targetPos = ray.GetPoint(75);
 
-        animator.SetTrigger("Shoot"); // play fire animation
+        // play fire animation
+        //playerAnimator.SetTrigger("Shoot"); // server
+        armsAnimator.SetTrigger("Fire"); // client
         
         ClientEventManager.current.VMFireShake(new Vector3(absValueRandom(Random.Range(0.05f, 0.15f)), Random.Range(0.2f, 0.3f), -Random.Range(0.45f, 0.55f)));
         CreateFakeBullet(targetPos);
@@ -191,6 +199,20 @@ public class WeaponBaseClass : MonoBehaviour
         if(Input.GetKey(KeyCode.R))
             Reload();
 
+    }
+
+    public void Equip()
+    {
+        //animator.SetTrigger("Equip");
+        transform.localPosition = vmOffset;
+        armsAnimator.SetTrigger("AK" + "Equip");
+        playerAnimator.SetTrigger("AKEquip");
+    }
+
+    public void Unequip()
+    {
+        armsAnimator.SetTrigger("Unequip");
+        playerAnimator.SetTrigger("Unequip");
     }
 
 }

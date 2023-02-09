@@ -5,13 +5,24 @@ public class WeaponControllerScript : MonoBehaviour
     public int selectedWeapon = 0;
     public Transform equippedWeapon;
 
+    private float startTime;
+    private bool firstSelect = false;
+
     void Start()
-    {
-        SelectWeapon();
+    {   
+        startTime = Time.time + 0.2f;
     }
 
     void Update()
     {
+
+        if(Time.time < startTime) {return;}
+        if(!firstSelect)
+        {
+            firstSelect = true;
+            SelectWeapon();
+        }
+
         int previousSelectedWeapon = selectedWeapon;
 
         if (Input.GetAxis("Mouse ScrollWheel") > 0f)
@@ -42,12 +53,31 @@ public class WeaponControllerScript : MonoBehaviour
         int i = 0;
         foreach (Transform weapon in transform)
         {
+            
+            GameObject go = weapon.gameObject;
+
+            if(weapon.childCount <= 0)
+            {
+                go.SetActive(false);
+                continue;
+            }
+            
+            Transform child = weapon.GetChild(0);
+            WeaponBaseClass wbc = child.GetComponent<WeaponBaseClass>();
+
             if (i == selectedWeapon)
             {
-                weapon.gameObject.SetActive(true);
+                go.SetActive(true);
+                wbc.Equip();
                 equippedWeapon = weapon;
-            } else {
-                weapon.gameObject.SetActive(false);
+            }
+            else
+            {
+                if(go.activeSelf)
+                {
+                    go.SetActive(false);
+                    wbc.Unequip();
+                }
             }
             
             i++;

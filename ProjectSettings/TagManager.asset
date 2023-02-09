@@ -17,8 +17,8 @@ TagManager:
   - GunCamera
   - 
   - Ground
-  - LocalPlayer
-  - LocalGun
+  - ServerPlayer
+  - ServerGun
   - 
   - 
   - 

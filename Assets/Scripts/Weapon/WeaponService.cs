@@ -9,6 +9,7 @@ public class WeaponService : MonoBehaviour
     [Header("Weapons")]
     [SerializeField] public WeaponScriptable Scriptable_AK;
     [SerializeField] public GameObject GameObject_AK;
+    [SerializeField] public GameObject ServerGameObject_AK;
 
     // WEAPON LISTS
     private IDictionary<string, WeaponScriptable> WeaponScriptables;
@@ -23,18 +24,29 @@ public class WeaponService : MonoBehaviour
 
         WeaponPrefabs = new Dictionary<string, GameObject>();
         WeaponPrefabs["AK"] = GameObject_AK;
+        WeaponPrefabs["AKServer"] = ServerGameObject_AK;
 
         EventManager.current.onWeaponAdd += AddWeapon;
     }
 
     public void AddWeapon(Transform player, string weaponName)
     {
-
-        Transform weaponController = player.GetComponent<CharacterVariables>().WeaponController;
+        
+        // Gather Var
+        CharacterVariables charvar = player.GetComponent<CharacterVariables>();
+        Transform weaponController = charvar.WeaponController;
+        Transform serverWeaponController = charvar.ServerWeaponController;
         WeaponScriptable weaponScriptable = WeaponScriptables[weaponName];
         GameObject weaponPrefab = WeaponPrefabs[weaponName];
+        GameObject serverWeaponPrefab = WeaponPrefabs[weaponName + "Server"];
         string weaponType = weaponScriptable.weaponInventoryType;
 
+        // Instantiate Server Model
+        GameObject serverPrefab = Instantiate(serverWeaponPrefab);
+        serverPrefab.transform.parent = serverWeaponController.Find(weaponType);
+        serverPrefab.transform.localPosition = Vector3.zero;
+
+        // Instantiate Client Model
         GameObject newPrefab = Instantiate(weaponPrefab);
         WeaponBaseClass baseClass = newPrefab.GetComponent<WeaponBaseClass>();
 

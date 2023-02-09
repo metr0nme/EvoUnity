@@ -125,11 +125,8 @@ public class BrycesMovement : NetworkBehaviour
     {
         bool isGrounded = false;
         RaycastHit hit;
-        //Physics.Raycast(transf)
         if(Physics.Raycast(orientation.transform.position, orientation.transform.TransformDirection(-Vector3.up), out hit, 0.18f)) //, groundlayer
             isGrounded = true;
-
-        Debug.Log(isGrounded.ToString());
 
         return isGrounded;
     }
