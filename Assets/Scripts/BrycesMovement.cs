@@ -28,6 +28,8 @@ public class BrycesMovement : NetworkBehaviour
     private string[] inputButtonsDef = {"W", "A", "S", "D", "Space"};
     private IDictionary<string, int> currInputs;
     private Rigidbody rb;
+    private CharacterVariables charvar;
+    private Animator playerAnimator;
 
     private void initInputs()
     {
@@ -51,7 +53,8 @@ public class BrycesMovement : NetworkBehaviour
 
     void Start()
     {
-
+        charvar = gameObject.GetComponent<CharacterVariables>();
+        playerAnimator = charvar.playerAnimator;
         if(!isLocalPlayer)
             playerCam.gameObject.SetActive(false);
 
@@ -76,22 +79,18 @@ public class BrycesMovement : NetworkBehaviour
     // its very important you have the arrays in the correct order {+, -} or {forward, backward}
     private int InverseInputOperation(int[] inputIntegers)
     {
-        int i = 0;
-        i = inputIntegers[0] == 1 ? 1 : (inputIntegers[1] == 1 ? -1 : 0);
-        return i;
+        return inputIntegers[0] == 1 ? 1 : inputIntegers[1] == 1 ? -1 : 0;
     }
 
     // Custom Movement Input
     private int RightDir()
     {
-        int[] rightInputArray = {currInputs["D"], currInputs["A"]};
-        return InverseInputOperation(rightInputArray);
+        return InverseInputOperation(new int[] {currInputs["D"], currInputs["A"]});
     }
 
     private int ForwardDir()
     {
-        int[] forwardInputArray = {currInputs["W"], currInputs["S"]};
-        return InverseInputOperation(forwardInputArray);
+        return InverseInputOperation(new int[] {currInputs["W"], currInputs["S"]});
     }
 
     // GetMovementVelocity taken from "pdnghiaqoi" on Roblox DevForums, ported to unity by "beters" (me bitch)
@@ -171,6 +170,9 @@ public class BrycesMovement : NetworkBehaviour
         } else {
             Air();
         }
+
+        playerAnimator.SetFloat("Speed", rb.velocity.magnitude);
+
     }
 
     void Update()

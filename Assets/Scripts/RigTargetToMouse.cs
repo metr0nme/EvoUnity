@@ -5,7 +5,7 @@ using UnityEngine;
 public class RigTargetToMouse : MonoBehaviour
 {   
 
-    [SerializeField] public Camera playerCam;
+    public Camera playerCam;
 
     void Update()
     {
