@@ -17,7 +17,6 @@ public class CharacterVariables : MonoBehaviour
     void Start()
     {
         IsLoaded = true;
-        EventManager.current.WeaponAdd(transform, weaponName);
     }
 
 }

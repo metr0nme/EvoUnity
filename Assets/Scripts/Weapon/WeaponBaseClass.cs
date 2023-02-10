@@ -104,7 +104,7 @@ public class WeaponBaseClass : MonoBehaviour
         return newValue;
     }
 
-    void Fire()
+    public virtual void Fire()
     {
         if (currentMagSize <= 0 || reloading)
             return;
