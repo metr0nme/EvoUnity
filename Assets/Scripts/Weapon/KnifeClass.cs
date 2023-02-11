@@ -38,7 +38,7 @@ public class KnifeClass : WeaponBaseClass
         CreateFakeBullet(targetPos);
         setCamRotFire();**/
 
-        Debug.Log("this bitch is working!");
+        //Debug.Log("this bitch is working!");
 
     }
 

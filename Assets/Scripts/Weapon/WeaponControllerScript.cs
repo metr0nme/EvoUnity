@@ -43,6 +43,9 @@ public class WeaponControllerScript : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha2))
             selectedWeapon = 1;
 
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+            selectedWeapon = 2;
+
         if (previousSelectedWeapon != selectedWeapon)
             SelectWeapon();
 
@@ -59,6 +62,7 @@ public class WeaponControllerScript : MonoBehaviour
             if(weapon.childCount <= 0)
             {
                 go.SetActive(false);
+                i++;
                 continue;
             }
             
@@ -81,6 +85,7 @@ public class WeaponControllerScript : MonoBehaviour
             }
             
             i++;
+
         }
     }
 }

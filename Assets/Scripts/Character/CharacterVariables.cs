@@ -12,6 +12,7 @@ public class CharacterVariables : MonoBehaviour
     [SerializeField] public GameObject Camera;
     [SerializeField] public Transform Arms;
     [SerializeField] public Animator playerAnimator;
+    [SerializeField] public Transform playerModel;
     public bool IsLoaded = false;
 
     void Start()

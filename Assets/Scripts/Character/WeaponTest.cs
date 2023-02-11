@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class WeaponTest : MonoBehaviour
 {
-    private string weaponName = "Knife";
+    private string weaponName = "AK";
 
     void Start()
     {

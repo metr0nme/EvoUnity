@@ -16,6 +16,8 @@ public class BrycesMovement : NetworkBehaviour
     [SerializeField] public float airMaxSpeed = 7f;
     [SerializeField] public float groundAccel = 10f;
     [SerializeField] public float groundMaxSpeed = 20f;
+    [SerializeField] public float walkMaxSpeed = 12f;
+    [SerializeField] public float crouchMaxSpeed = 8f;
     [SerializeField] public float jumpVelocity = 50f;
     [SerializeField] public float gravity = 100f;
 
@@ -23,13 +25,23 @@ public class BrycesMovement : NetworkBehaviour
     [SerializeField] public Transform playerCam;
     [SerializeField] public Transform orientation;
     [SerializeField] public LayerMask groundLayer;
+    [SerializeField] public LayerMask stickDetectLayers;
+
+    private BoxCollider collider;
+    private Vector3 colliderDefSize;
+    private Vector3 colliderDefCenter;
+    private Vector3 colliderCrouchSize;
+    private Vector3 colliderCrouchCenter;
 
     // Script Var
-    private string[] inputButtonsDef = {"W", "A", "S", "D", "Space"};
+    private string[] inputButtonsDef = {"W", "A", "S", "D", "Space", "C", "LeftShift"};
     private IDictionary<string, int> currInputs;
     private Rigidbody rb;
     private CharacterVariables charvar;
     private Animator playerAnimator;
+    private float currentGroundMaxSpeed;
+
+    private bool crouching = false;
 
     private void initInputs()
     {
@@ -60,6 +72,14 @@ public class BrycesMovement : NetworkBehaviour
 
         initInputs();
         rb = GetComponent<Rigidbody>();
+        currentGroundMaxSpeed = groundMaxSpeed;
+        collider = charvar.playerModel.GetComponent<BoxCollider>();
+        colliderDefSize = collider.size;
+        colliderDefCenter = collider.center;
+        colliderCrouchSize = colliderDefSize;
+        colliderCrouchSize.y -= .2f;
+        colliderCrouchCenter = colliderDefCenter;
+        colliderCrouchCenter.y += .2f;
     }
 
     private void RegisterInputs()
@@ -93,6 +113,21 @@ public class BrycesMovement : NetworkBehaviour
         return InverseInputOperation(new int[] {currInputs["W"], currInputs["S"]});
     }
 
+    private Vector3 ?StickDetect() // Returns Sticking Direction if Sticking
+    {
+        // iterate through 4 directions
+        Vector3[] rayDirections = new Vector3[] {orientation.transform.forward, orientation.transform.right, -orientation.transform.right, -orientation.transform.forward};
+        foreach(Vector3 dir in rayDirections)
+        {
+            RaycastHit hit;
+            if(Physics.Raycast(orientation.transform.position, dir, out hit, 0.07f, stickDetectLayers))
+            {
+                return dir;
+            }
+        }
+        return null;
+    }
+
     // GetMovementVelocity taken from "pdnghiaqoi" on Roblox DevForums, ported to unity by "beters" (me bitch)
     private Vector3 GetMovementVelocity(Vector3 previousVelocity, float acceleration, float maxSpeed, bool ground)
     {
@@ -106,16 +141,33 @@ public class BrycesMovement : NetworkBehaviour
         // fix zero errors
         if(currForwardDir == 0 && currRightDir == 0)
             accelDir = Vector3.zero;
-            
+        
+        
         float projVel = Vector3.Dot(previousVelocity, accelDir);
         float accelVel = acceleration * Time.fixedDeltaTime;
 
         if(projVel + accelVel > maxSpeed)
             accelVel = Mathf.Max(maxSpeed - projVel, 0);
 
+        // dont allow acceleration on the Y axis
         Vector3 newVel = previousVelocity + accelDir * accelVel;
-        if(ground)
+        newVel.y = previousVelocity.y;
+
+        // fix sticking
+        if(!ground)
+        {
+            Vector3 ?Sticking = StickDetect();
+            if(Sticking != null)
+            {
+                for(int i = 0; i < 3; i++)
+                {
+                    if(Sticking.Value[i] != 0)
+                        newVel[i] = 0;
+                }
+            }
+        } else {
             newVel.y = 0;
+        }
 
         return newVel;
     }
@@ -132,18 +184,18 @@ public class BrycesMovement : NetworkBehaviour
 
     private void Run()
     {
-
+        
         Vector3 prevVel = rb.velocity;
         float speed = prevVel.magnitude;
 
         // apply friction if player is moving
-        if(speed != 0)
+        if(speed != 0 && IsGrounded())
         {
             float drop = speed * friction * Time.fixedDeltaTime;
             prevVel *= Mathf.Max(speed - drop, 0) / speed;
         }
         
-        rb.velocity = GetMovementVelocity(prevVel, groundAccel, groundMaxSpeed, true);
+        rb.velocity = GetMovementVelocity(prevVel, groundAccel, currentGroundMaxSpeed, true);
 
     }
 
@@ -159,8 +211,36 @@ public class BrycesMovement : NetworkBehaviour
         Air();
     }
 
+    private void Crouch()
+    {
+        crouching = true;
+        currentGroundMaxSpeed = crouchMaxSpeed;
+        playerAnimator.SetBool("Crouch", true); // play crouch animation
+        collider.size = colliderCrouchSize; // shrink collider accordingly
+        collider.center = colliderCrouchCenter;
+    }
+
+    private void UncrouchCheck()
+    {
+        if(playerAnimator.GetBool("Crouch") == true)
+        {
+            playerAnimator.SetBool("Crouch", false);
+            collider.size = colliderDefSize;
+            collider.center = colliderDefCenter;
+        }
+            
+    }
+
+    private void SlowWalk()
+    {
+        currentGroundMaxSpeed = walkMaxSpeed;
+    }
+
     private void Movement()
     {
+        
+        // this is where the movement state function is decided,
+        // so decide the MovementState str here aswell.
         if(IsGrounded())
         {
             if (currInputs["Space"] == 1)
@@ -169,6 +249,24 @@ public class BrycesMovement : NetworkBehaviour
                 Run();
         } else {
             Air();
+        }
+
+        // register slow walk/crouch functions
+        if(currInputs["C"] == 1)
+            Crouch();
+        else {
+            if(crouching) {
+                crouching = false;
+                UncrouchCheck();
+                currentGroundMaxSpeed = groundMaxSpeed;
+            }
+        }
+
+        if(currInputs["LeftShift"] == 1)
+        {
+            if(!crouching) {SlowWalk();}
+        } else {
+            if(!crouching) {currentGroundMaxSpeed = groundMaxSpeed;}
         }
 
         playerAnimator.SetFloat("Speed", rb.velocity.magnitude);

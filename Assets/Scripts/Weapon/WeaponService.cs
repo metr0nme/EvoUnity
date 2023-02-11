@@ -52,9 +52,9 @@ public class WeaponService : MonoBehaviour
         string weaponType = weaponScriptable.weaponInventoryType;
 
         // Instantiate Server Model
-        GameObject serverPrefab = Instantiate(serverWeaponPrefab);
-        serverPrefab.transform.parent = serverWeaponController.Find(weaponType);
-        serverPrefab.transform.localPosition = Vector3.zero;
+        //GameObject serverPrefab = Instantiate(serverWeaponPrefab);
+        //serverPrefab.transform.parent = serverWeaponController.Find(weaponType);
+        //serverPrefab.transform.localPosition = Vector3.zero;
 
         // Instantiate Client Model
         GameObject newPrefab = Instantiate(weaponPrefab);

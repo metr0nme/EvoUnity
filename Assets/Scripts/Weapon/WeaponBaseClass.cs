@@ -78,7 +78,7 @@ public class WeaponBaseClass : MonoBehaviour
 
     }
 
-    void setCurrentBullet()
+    public virtual void setCurrentBullet()
     {
         if(Time.time >= nextRecoilResetTick)
             currentBullet = 0;
@@ -88,7 +88,7 @@ public class WeaponBaseClass : MonoBehaviour
         nextRecoilResetTick = Time.time + recoilResetRate;
     }
 
-    void setCamRotFire()
+    public virtual void setCamRotFire()
     {
         currRecoilVal = sprayPattern[currentBullet];
         float[] va = {-currRecoilVal.x, Random.Range(-currRecoilVal.y, currRecoilVal.y)};
@@ -137,7 +137,7 @@ public class WeaponBaseClass : MonoBehaviour
         setCamRotFire();
     }
 
-    void ReloadUpdateVar()
+    public virtual void ReloadUpdateVar()
     {
         int need = magSize - currentMagSize;
 
@@ -156,7 +156,7 @@ public class WeaponBaseClass : MonoBehaviour
         reloading = false;
     }
 
-    void Reload()
+    public virtual void Reload()
     {
 
         if(reloading || currentTotalAmmo <= 0)
@@ -166,7 +166,7 @@ public class WeaponBaseClass : MonoBehaviour
         
     }
 
-    void CreateFakeBullet(Vector3 hitPos)
+    public virtual void CreateFakeBullet(Vector3 hitPos)
     {
         Vector3 dir = hitPos - FirePoint.transform.position;
         GameObject newBullet = Instantiate(BulletTemplate, FirePoint.transform.position, Quaternion.identity);
@@ -174,7 +174,7 @@ public class WeaponBaseClass : MonoBehaviour
         Destroy(newBullet, 0.5f);
     }
 
-    void OldHandleMouseSway()
+    public virtual void OldHandleMouseSway()
     {
         // handle sway spring
         //float mouseX = Input.GetAxisRaw("Mouse X") * 5; //TODO: replace mousex, mousey with MouseDelta
@@ -183,7 +183,7 @@ public class WeaponBaseClass : MonoBehaviour
         //transform.localPosition += swaySpring.Evaluate(Time.fixedDeltaTime); // update sway spring pos to be added to other springs
     }
 
-    void Update()
+    public virtual void Update()
     {
 
         if(Input.GetMouseButton(0)) // so theres "GetMouseButton" and "GetMouseButtonDown". GetMouseButtonDown registers only the first time the user clicks, GetMouseButton will register every frame the user is clicking.
@@ -201,15 +201,16 @@ public class WeaponBaseClass : MonoBehaviour
 
     }
 
-    public void Equip()
+    public virtual void Equip()
     {
+        Debug.Log("Equipping!");
         //animator.SetTrigger("Equip");
         transform.localPosition = vmOffset;
         armsAnimator.SetTrigger("AK" + "Equip");
-        playerAnimator.SetTrigger("AKEquip");
+        playerAnimator.SetTrigger("AK" + "Equip");
     }
 
-    public void Unequip()
+    public virtual void Unequip()
     {
         armsAnimator.SetTrigger("Unequip");
         playerAnimator.SetTrigger("Unequip");
